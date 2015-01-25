@@ -164,8 +164,18 @@ void CallGraphWriter::openPrintedTreeNode(const EntryTraversalTask& aNode) {
     else
       g[u].MemoryExclCost -= mem_diff;
   }
+  
   // and, an edge must be added from the parent node to the new vertex:
-  edge_t e; bool e_added; 
+  edge_t e; bool e_added;
+  
+  // ---- Avoid parallel edges in the meta-call-graph ----
+  // first, check if edge already exists:
+  std::tie(e, e_added) = edge(u, v, g);
+  if( e_added ) {
+    return;
+  }
+  // ---- End ----
+  
   std::tie(e, e_added) = add_edge(u, v, g);
   
   // FIXME (?) Point of instantiation of template should be in the same file as parent template.

@@ -209,7 +209,6 @@ There are a number of things that could be done more in terms of tools to analys
 
 Here is a wish-list (incomplete, and in no particular order of priority):
 
- - Eliminate parallel edges in the meta-call-graph.
  - Making a C API dynamic library for the loading of templight profiles.
  - Implement a level-of-details scheme for template names (expanding template arguments).
  - Some sort of recommender system that would identify places where type-erasure or dynamic polymorphism could be used instead of templates to maximize the benefits in compilation cost-reduction.

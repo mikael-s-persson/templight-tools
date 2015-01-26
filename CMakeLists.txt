@@ -18,7 +18,7 @@
 #     along with templight-tools (as LICENSE in the root folder).
 #     If not, see <http://www.gnu.org/licenses/>.
 
-cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 2.8)
 
 project(Templight-Tools)
 set(CMAKE_PROJECT_NAME templight-tools)
@@ -38,7 +38,7 @@ include(BoilerplateMacros)
 enable_cpp11( REQUIRED )
 
 
-if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
+if((${CMAKE_VERSION} VERSION_GREATER "2.8.7") AND (EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake"))
   include(InstallRequiredSystemLibraries)
   
   if(WIN32)
@@ -126,7 +126,7 @@ install(DIRECTORY include/ DESTINATION include COMPONENT libtemplight-dev FILES_
 
 
 
-if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
+if((${CMAKE_VERSION} VERSION_GREATER "2.8.7") AND (EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake"))
   
   cpack_add_component(templight-tools
     DISPLAY_NAME "templight-tools"

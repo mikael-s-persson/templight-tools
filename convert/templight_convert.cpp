@@ -52,7 +52,7 @@ int main(int argc, const char **argv) {
   po::options_description io_options("I/O options");
   io_options.add_options()
     ("output,o", po::value<std::string>()->default_value("-"), "Write Templight profiling traces to <output-file>. Use '-' for output to stdout (default).")
-    ("format,f", po::value<std::string>()->default_value("protobuf"), "Specify the format of Templight outputs (protobuf / xml / text / graphml / graphviz / nestedxml / graphml-cg / graphviz-cg / callgrind, default is protobuf).")
+    ("format,f", po::value<std::string>()->default_value("protobuf"), "Specify the format of Templight outputs (protobuf / yaml / xml / text / graphml / graphviz / nestedxml / graphml-cg / graphviz-cg / callgrind, default is protobuf).")
     ("blacklist,b", po::value<std::string>(), "Use regex expressions in <file> to filter out undesirable traces.")
     ("compression,c", po::value<int>()->default_value(0), "Specify the compression level of Templight outputs whenever the format allows.")
     ("input,i", po::value< std::vector<std::string> >(), "Read Templight profiling traces from <input-file>. If not specified, the traces will be read from stdin.")
@@ -126,9 +126,9 @@ int main(int argc, const char **argv) {
   else if ( Format == "callgrind" ) {
     printer.takeWriter(new CallGrindWriter(*printer.getTraceStream()));
   }
-//   else if ( Format == "yaml" ) {
-//     printer.takeWriter(new YamlWriter(*printer.getTraceStream()));
-//   }
+  else if ( Format == "yaml" ) {
+    printer.takeWriter(new YamlWriter(*printer.getTraceStream()));
+  }
   else {
     std::cerr << "Error: [Templight-Convert] Unrecognized templight trace format: " << Format << std::endl;
     return 2;

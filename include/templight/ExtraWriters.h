@@ -40,20 +40,21 @@
 #include <string>
 #include <vector>
 
-#if 0
-namespace llvm {
-  namespace yaml {
-    class Output;
-  }
-}
-#endif
-
 namespace templight {
 
-#if 0
+/** \brief A trace-writer for an YAML format.
+ * 
+ * This class will render the traces into the given output stream in 
+ * the YAML format, as a flat sequence of begin and end entries.
+ * \note This is the class invoked when the 'yaml' format option is used.
+ */
 class YamlWriter : public EntryWriter {
 public:
   
+  /** \brief Creates a writer for the given output stream.
+   * 
+   * Creates an entry-writer for the given output stream.
+   */
   YamlWriter(std::ostream& aOS);
   ~YamlWriter();
   
@@ -63,10 +64,7 @@ public:
   void printEntry(const PrintableEntryBegin& aEntry) override;
   void printEntry(const PrintableEntryEnd& aEntry) override;
   
-private:
-  std::unique_ptr<llvm::yaml::Output> Output;
 };
-#endif
 
 
 /** \brief A trace-writer for an XML format.

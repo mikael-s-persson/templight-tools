@@ -27,11 +27,6 @@
 #include <iomanip>
 #include <vector>
 
-#if 0
-#include <clang/Sema/ActiveTemplateInst.h>
-#include <llvm/Support/YAMLTraits.h>
-#endif
-
 namespace templight {
 
 
@@ -82,104 +77,60 @@ static std::string escapeXml(const std::string& Input) {
   return Result;
 }
 
-#if 0
 
-} /* clang */ namespace llvm { namespace yaml {
+void YamlWriter::initialize(const std::string& aSourceName) {}
 
-template <>
-struct ScalarEnumerationTraits<
-    clang::ActiveTemplateInstantiation::InstantiationKind> {
-  static void enumeration(IO &io,
-    clang::ActiveTemplateInstantiation::InstantiationKind &value) {
+void YamlWriter::finalize() {}
 
-#define def_enum_case(e) io.enumCase(value, InstantiationKindStrings[e], e)
-
-    using namespace clang;
-    def_enum_case(ActiveTemplateInstantiation::TemplateInstantiation);
-    def_enum_case(ActiveTemplateInstantiation::DefaultTemplateArgumentInstantiation);
-    def_enum_case(ActiveTemplateInstantiation::DefaultFunctionArgumentInstantiation);
-    def_enum_case(ActiveTemplateInstantiation::ExplicitTemplateArgumentSubstitution);
-    def_enum_case(ActiveTemplateInstantiation::DeducedTemplateArgumentSubstitution);
-    def_enum_case(ActiveTemplateInstantiation::PriorTemplateArgumentSubstitution);
-    def_enum_case(ActiveTemplateInstantiation::DefaultTemplateArgumentChecking);
-    def_enum_case(ActiveTemplateInstantiation::ExceptionSpecInstantiation);
-    def_enum_case(ActiveTemplateInstantiation::Memoization);
-
-#undef def_enum_case
-  }
-};
-
-template <>
-struct MappingTraits<templight::PrintableEntryBegin> {
-  static void mapping(IO &io, templight::PrintableEntryBegin &Entry) {
-    bool b = true;
-    io.mapRequired("IsBegin", b);
-    // must be converted to string before, due to some BS with yaml traits.
-    std::string kind = templight::InstantiationKindStrings[Entry.InstantiationKind];
-    io.mapRequired("Kind", kind);
-    io.mapOptional("Name", Entry.Name);
-    std::string loc = Entry.FileName + "|" + 
-                      std::to_string(Entry.Line) + "|" + 
-                      std::to_string(Entry.Column);
-    io.mapOptional("Location", loc);
-    io.mapRequired("TimeStamp", Entry.TimeStamp);
-    io.mapOptional("MemoryUsage", Entry.MemoryUsage);
-    std::string ori = Entry.TempOri_FileName + "|" + 
-                      std::to_string(Entry.TempOri_Line) + "|" + 
-                      std::to_string(Entry.TempOri_Column);
-    io.mapOptional("TemplateOrigin", ori);
-  }
-};
-
-template <>
-struct MappingTraits<templight::PrintableEntryEnd> {
-  static void mapping(IO &io, templight::PrintableEntryEnd &Entry) {
-    bool b = false;
-    io.mapRequired("IsBegin", b);
-    io.mapRequired("TimeStamp", Entry.TimeStamp);
-    io.mapOptional("MemoryUsage", Entry.MemoryUsage);
-  }
-};
-
-} /* yaml */ } /* llvm */ namespace templight {
-
-
-void YamlWriter::initialize(const std::string& aSourceName) {
-  Output->beginSequence();
-}
-
-void YamlWriter::finalize() {
-  Output->endSequence();
-}
-
-void YamlWriter::printEntry(const PrintableEntryBegin& Entry) {
-  void *SaveInfo;
-  if ( Output->preflightElement(1, SaveInfo) ) {
-    llvm::yaml::yamlize(*Output, const_cast<PrintableEntryBegin&>(Entry), 
-                        true);
-    Output->postflightElement(SaveInfo);
+void YamlWriter::printEntry(const PrintableEntryBegin& aEntry) {
+  /*
+- IsBegin:         true
+  Kind:            Memoization
+  Name:            'Fibonacci<2>'
+  Location:        'fibonacci.cpp|17|61'
+  TimeStamp:       4.75621e+08
+  MemoryUsage:     0
+  TemplateOrigin:  'fibonacci.cpp|16|8'
+  */
+  
+  OutputOS << 
+    "- IsBegin:         true\n"
+    "  Kind:            " << InstantiationKindStrings[aEntry.InstantiationKind] << "\n"
+    "  Name:            '" << aEntry.Name << "'\n"
+    "  Location:        '" << aEntry.FileName << "|" 
+                           << aEntry.Line << "|" 
+                           << aEntry.Column << "'\n";
+  OutputOS << 
+    "  TimeStamp:       " << std::fixed << std::setprecision(9) << aEntry.TimeStamp << "\n"
+    "  MemoryUsage:     " << aEntry.MemoryUsage << "\n";
+  if( !aEntry.TempOri_FileName.empty() ) {
+    OutputOS << 
+      "  TemplateOrigin:  '" << aEntry.TempOri_FileName << "|" 
+                             << aEntry.TempOri_Line << "|" 
+                             << aEntry.TempOri_Column << "'\n";
   }
 }
 
-void YamlWriter::printEntry(const PrintableEntryEnd& Entry) {
-  void *SaveInfo;
-  if ( Output->preflightElement(1, SaveInfo) ) {
-    llvm::yaml::yamlize(*Output, const_cast<PrintableEntryEnd&>(Entry), 
-                        true);
-    Output->postflightElement(SaveInfo);
-  }
+void YamlWriter::printEntry(const PrintableEntryEnd& aEntry) {
+  /*
+- IsBegin:         false
+  TimeStamp:       4.75621e+08
+  MemoryUsage:     0
+  */
+  
+  OutputOS << 
+    "- IsBegin:         false\n"
+    "  TimeStamp:       " << std::fixed << std::setprecision(9) << aEntry.TimeStamp << "\n"
+    "  MemoryUsage:     " << aEntry.MemoryUsage << "\n";
 }
 
-YamlWriter::YamlWriter(llvm::raw_ostream& aOS) : EntryWriter(aOS) {
-  Output.reset(new llvm::yaml::Output(OutputOS));
-  Output->beginDocuments();
+YamlWriter::YamlWriter(std::ostream& aOS) : EntryWriter(aOS) {
+  OutputOS << "---\n";
 }
 
 YamlWriter::~YamlWriter() {
-  Output->endDocuments();
+  OutputOS << "...\n";
 }
-
-#endif
 
 
 XmlWriter::XmlWriter(std::ostream& aOS) : EntryWriter(aOS) {

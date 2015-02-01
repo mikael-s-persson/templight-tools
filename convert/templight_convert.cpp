@@ -149,7 +149,7 @@ int main(int argc, const char **argv) {
     if( in_files[i] == "-" )
       p_buf = &std::cin;
     else {
-      p_buf = new std::ifstream(in_files[i]);
+      p_buf = new std::ifstream(in_files[i], std::ios_base::in | std::ios_base::binary);
       if( p_buf && !(*p_buf) ) {
         std::cerr << "Warning: [Templight-Convert] Could not open the templight trace file: " << in_files[i] << std::endl;
         delete p_buf;

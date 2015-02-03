@@ -93,10 +93,20 @@ void YamlWriter::printEntry(const PrintableEntryBegin& aEntry) {
   TemplateOrigin:  'fibonacci.cpp|16|8'
   */
   
+  //Repeats single-quoted scalar indicators (`'`) as described here: http://www.yaml.org/spec/1.2/spec.html#id2788097
+  auto escapeSingleQuotedScalar = [](std::string s) -> std::string {
+    std::string::size_type pos = 0;
+    while ((pos = s.find_first_of('\'', pos)) != std::string::npos) {
+      s.insert(pos, 1, '\'');
+      pos += 2;
+    }
+    return s;
+  };
+  
   OutputOS << 
     "- IsBegin:         true\n"
     "  Kind:            " << InstantiationKindStrings[aEntry.InstantiationKind] << "\n"
-    "  Name:            '" << aEntry.Name << "'\n"
+    "  Name:            '" << escapeSingleQuotedScalar(aEntry.Name) << "'\n" /* aEntry.Name can contain something like: boost::detail::integer_traits_base<char, '\x80', '\x7F'> */
     "  Location:        '" << aEntry.FileName << "|" 
                            << aEntry.Line << "|" 
                            << aEntry.Column << "'\n";

@@ -117,7 +117,7 @@ EntryPrinter::~EntryPrinter() {
   }
 }
 
-bool EntryPrinter::isValid() const { return p_writer.get(); }
+bool EntryPrinter::isValid() const { return p_writer.operator bool(); }
 
 std::ostream* EntryPrinter::getTraceStream() const { return TraceOS; }
 

@@ -257,7 +257,7 @@ struct getFloatWire {
 inline bool loadBool(std::istream& p_buf) {
   if ( ! p_buf )
     return false;
-  return p_buf.get();
+  return p_buf.get() != 0;
 }
 
 /** \brief Meta-function to get the wire value for a bool with a given tag number.

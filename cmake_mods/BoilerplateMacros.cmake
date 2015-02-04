@@ -23,6 +23,7 @@
 #     along with templight-tools (as LICENSE in the root folder).
 #     If not, see <http://www.gnu.org/licenses/>.
 
+cmake_policy(SET CMP0054 OLD)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)

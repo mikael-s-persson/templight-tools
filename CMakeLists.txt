@@ -32,6 +32,9 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
+# Use this line to force static boost libs (or pass -DBoost_USE_STATIC_LIBS=ON to cmake command).
+# set(Boost_USE_STATIC_LIBS ON)
+
 # This BoilerplateMacros module sets most compiler flags and includes boost libraries.
 include(BoilerplateMacros)
 

@@ -108,9 +108,8 @@ message(STATUS "Configured compiler options for ${CMAKE_SYSTEM_NAME} system with
 # set(Boost_DEBUG TRUE)
 
 set(Boost_ADDITIONAL_VERSIONS "1.45" "1.45.0" "1.46" "1.46.0" "1.46.1" "1.47" "1.47.0" "1.48" "1.48.0" "1.49" "1.49.0" "1.50" "1.50.0" "1.51" "1.51.0" "1.52" "1.52.0" "1.53" "1.53.0" "1.54" "1.54.0" "1.55" "1.55.0" "1.56" "1.56.0" "1.57" "1.57.0")
-if( CMAKE_HOST_WIN32 )
-  set(Boost_USE_STATIC_LIBS ON)
-else()
+if(NOT DEFINED Boost_USE_STATIC_LIBS)
+  # Some bug in some versions of FindBoost requires that this be set to OFF manually first.
   set(Boost_USE_STATIC_LIBS OFF)
 endif()
 set(Boost_USE_MULTITHREADED ON)

@@ -39,10 +39,10 @@ void ProtobufReader::loadHeader(std::streampos buf_limit) {
   SourceName = "";
   
   while ( buffer->tellg() < buf_limit ) {
-    unsigned int cur_wire = thin_protobuf::loadVarInt(*buffer);
+    auto cur_wire = thin_protobuf::loadVarInt(*buffer);
     switch( cur_wire ) {
       case thin_protobuf::getVarIntWire<1>::value:
-        Version = thin_protobuf::loadVarInt(*buffer);
+        Version = thin_protobuf::loadVarIntAs<unsigned int>(*buffer);
         break;
       case thin_protobuf::getStringWire<2>::value:
         SourceName = thin_protobuf::loadString(*buffer);
@@ -62,13 +62,13 @@ void ProtobufReader::loadDictionaryEntry(std::streampos buf_limit) {
   std::vector<std::size_t> markers;
   
   while ( buffer->tellg() < buf_limit ) {
-    unsigned int cur_wire = thin_protobuf::loadVarInt(*buffer);
+    auto cur_wire = thin_protobuf::loadVarInt(*buffer);
     switch( cur_wire ) {
       case thin_protobuf::getStringWire<1>::value:
         name = thin_protobuf::loadString(*buffer);
         break;
       case thin_protobuf::getVarIntWire<2>::value:
-        markers.push_back(thin_protobuf::loadVarInt(*buffer));
+        markers.push_back(thin_protobuf::loadVarIntAs<std::size_t>(*buffer));
         break;
       default:
         thin_protobuf::skipData(*buffer, cur_wire);
@@ -100,19 +100,19 @@ static void loadLocation(std::istream* buffer,
   Column = 0;
   
   while ( buffer->tellg() < buf_limit ) {
-    unsigned int cur_wire = thin_protobuf::loadVarInt(*buffer);
+    auto cur_wire = thin_protobuf::loadVarInt(*buffer);
     switch( cur_wire ) {
       case thin_protobuf::getStringWire<1>::value:
         FileName = thin_protobuf::loadString(*buffer);
         break;
       case thin_protobuf::getVarIntWire<2>::value:
-        FileID = thin_protobuf::loadVarInt(*buffer);
+        FileID = thin_protobuf::loadVarIntAs<std::size_t>(*buffer);
         break;
       case thin_protobuf::getVarIntWire<3>::value:
-        Line = thin_protobuf::loadVarInt(*buffer);
+        Line = thin_protobuf::loadVarIntAs<int>(*buffer);
         break;
       case thin_protobuf::getVarIntWire<4>::value:
-        Column = thin_protobuf::loadVarInt(*buffer);
+        Column = thin_protobuf::loadVarIntAs<int>(*buffer);
         break;
       default:
         thin_protobuf::skipData(*buffer, cur_wire);
@@ -137,7 +137,7 @@ void ProtobufReader::loadTemplateName(std::streampos buf_limit) {
   LastBeginEntry.Name = "";
   
   while ( buffer->tellg() < buf_limit ) {
-    unsigned int cur_wire = thin_protobuf::loadVarInt(*buffer);
+    auto cur_wire = thin_protobuf::loadVarInt(*buffer);
     switch( cur_wire ) {
       case thin_protobuf::getStringWire<1>::value:
         LastBeginEntry.Name = thin_protobuf::loadString(*buffer);
@@ -155,7 +155,7 @@ void ProtobufReader::loadTemplateName(std::streampos buf_limit) {
       }
 #endif
       case thin_protobuf::getVarIntWire<3>::value: {
-        LastBeginEntry.Name = templateNameMap[thin_protobuf::loadVarInt(*buffer)];
+        LastBeginEntry.Name = templateNameMap[thin_protobuf::loadVarIntAs<std::size_t>(*buffer)];
         break;
       }
       default:
@@ -174,19 +174,19 @@ void ProtobufReader::loadBeginEntry(std::streampos buf_limit) {
   LastBeginEntry.MemoryUsage = 0;
   
   while ( buffer->tellg() < buf_limit ) {
-    unsigned int cur_wire = thin_protobuf::loadVarInt(*buffer);
+    auto cur_wire = thin_protobuf::loadVarInt(*buffer);
     switch( cur_wire ) {
       case thin_protobuf::getVarIntWire<1>::value:
-        LastBeginEntry.InstantiationKind = thin_protobuf::loadVarInt(*buffer);
+        LastBeginEntry.InstantiationKind = thin_protobuf::loadVarIntAs<int>(*buffer);
         break;
       case thin_protobuf::getStringWire<2>::value: {
-        std::uint64_t cur_size = thin_protobuf::loadVarInt(*buffer);
-        loadTemplateName(buffer->tellg() + std::streamoff(cur_size));
+        auto cur_size = thin_protobuf::loadVarIntAs<std::streamoff>(*buffer);
+        loadTemplateName(buffer->tellg() + cur_size);
         break;
       }
       case thin_protobuf::getStringWire<3>::value: {
-        std::uint64_t cur_size = thin_protobuf::loadVarInt(*buffer);
-        loadLocation(buffer, buffer->tellg() + std::streamoff(cur_size), fileNameMap, 
+        auto cur_size = thin_protobuf::loadVarIntAs<std::streamoff>(*buffer);
+        loadLocation(buffer, buffer->tellg() + cur_size, fileNameMap, 
           LastBeginEntry.FileName, LastBeginEntry.Line, LastBeginEntry.Column);
         break;
       }
@@ -197,8 +197,8 @@ void ProtobufReader::loadBeginEntry(std::streampos buf_limit) {
         LastBeginEntry.MemoryUsage = thin_protobuf::loadVarInt(*buffer);
         break;
       case thin_protobuf::getStringWire<6>::value: {
-        std::uint64_t cur_size = thin_protobuf::loadVarInt(*buffer);
-        loadLocation(buffer, buffer->tellg() + std::streamoff(cur_size), fileNameMap, 
+        auto cur_size = thin_protobuf::loadVarIntAs<std::streamoff>(*buffer);
+        loadLocation(buffer, buffer->tellg() + cur_size, fileNameMap, 
           LastBeginEntry.TempOri_FileName, LastBeginEntry.TempOri_Line, LastBeginEntry.TempOri_Column);
         break;
       }
@@ -217,7 +217,7 @@ void ProtobufReader::loadEndEntry(std::streampos buf_limit) {
   LastEndEntry.MemoryUsage = 0;
   
   while ( buffer->tellg() < buf_limit ) {
-    unsigned int cur_wire = thin_protobuf::loadVarInt(*buffer);
+    auto cur_wire = thin_protobuf::loadVarInt(*buffer);
     switch( cur_wire ) {
       case thin_protobuf::getDoubleWire<1>::value:
         LastEndEntry.TimeStamp = thin_protobuf::loadDouble(*buffer);
@@ -238,15 +238,15 @@ ProtobufReader::LastChunkType
     ProtobufReader::startOnBuffer(std::istream& aBuffer) {
   buffer = &aBuffer;
   fileNameMap.clear();
-  unsigned int cur_wire = thin_protobuf::loadVarInt(*buffer);
+  auto cur_wire = thin_protobuf::loadVarInt(*buffer);
   if ( cur_wire != thin_protobuf::getStringWire<1>::value ) {
     buffer = nullptr;
     next_start = 0;
     LastChunk = ProtobufReader::EndOfFile;
     return LastChunk;
   }
-  std::uint64_t cur_size = thin_protobuf::loadVarInt(*buffer);
-  next_start = buffer->tellg() + std::streamoff(cur_size);
+  auto cur_size = thin_protobuf::loadVarIntAs<std::streamoff>(*buffer);
+  next_start = buffer->tellg() + cur_size;
   return next();
 }
 
@@ -261,18 +261,18 @@ ProtobufReader::LastChunkType ProtobufReader::next() {
       return startOnBuffer(*buffer);
     }
   }
-  unsigned int cur_wire = thin_protobuf::loadVarInt(*buffer);
+  auto cur_wire = thin_protobuf::loadVarInt(*buffer);
   switch(cur_wire) {
     case thin_protobuf::getStringWire<1>::value: {
-      std::uint64_t cur_size = thin_protobuf::loadVarInt(*buffer);
-      loadHeader(buffer->tellg() + std::streamoff(cur_size));
+      auto cur_size = thin_protobuf::loadVarIntAs<std::streamoff>(*buffer);
+      loadHeader(buffer->tellg() + cur_size);
       return LastChunk;
     };
     case thin_protobuf::getStringWire<2>::value: {
-      std::uint64_t cur_size = thin_protobuf::loadVarInt(*buffer);
-      std::streampos cur_limit = buffer->tellg() + std::streamoff(cur_size);
+      auto cur_size = thin_protobuf::loadVarIntAs<std::streamoff>(*buffer);
+      std::streampos cur_limit = buffer->tellg() + cur_size;
       cur_wire = thin_protobuf::loadVarInt(*buffer);
-      cur_size = thin_protobuf::loadVarInt(*buffer);
+      /* cur_size = */ thin_protobuf::loadVarInt(*buffer);
       switch( cur_wire ) {
         case thin_protobuf::getStringWire<1>::value:
           loadBeginEntry(cur_limit);
@@ -281,13 +281,14 @@ ProtobufReader::LastChunkType ProtobufReader::next() {
           loadEndEntry(cur_limit);
           break;
         default: // ignore for fwd-compat.
+          // FIXME It's weird that nothing is done here.
           break;
       };
       return LastChunk;
     };
     case thin_protobuf::getStringWire<3>::value: {
-      std::uint64_t cur_size = thin_protobuf::loadVarInt(*buffer);
-      loadDictionaryEntry(buffer->tellg() + std::streamoff(cur_size));
+      auto cur_size = thin_protobuf::loadVarIntAs<std::streamoff>(*buffer);
+      loadDictionaryEntry(buffer->tellg() + cur_size);
       LastChunk = ProtobufReader::Other;
       return LastChunk;
     };

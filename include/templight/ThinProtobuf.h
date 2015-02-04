@@ -46,6 +46,7 @@
 #include <istream>
 #include <string>
 #include <cstdint>
+#include <limits>
 
 namespace thin_protobuf {
 
@@ -149,6 +150,11 @@ inline std::uint64_t loadVarInt(std::istream& p_buf) {
   return u;
 }
 
+template <typename T>
+inline T loadVarIntAs(std::istream& p_buf) {
+  return static_cast<T>(loadVarInt(p_buf));
+}
+
 /** \brief Meta-function to get the wire value for a variable-length integer with a given tag number.
  * 
  * This meta-function gives a compile-time wire value corresponding to a variable-length 
@@ -156,9 +162,9 @@ inline std::uint64_t loadVarInt(std::istream& p_buf) {
  * if the protobuf message has a field like: "optional uint32 foo = 3;", then 
  * the wire value would be "getVarIntWire<3>::value".
  */
-template <unsigned int tag>
+template <std::uint64_t tag>
 struct getVarIntWire {
-  static const unsigned int value = (tag << 3);
+  static const std::uint64_t value = (tag << 3);
 };
 
 /** \brief Meta-function to get the wire value for a variable-length integer with a given tag number.
@@ -168,9 +174,9 @@ struct getVarIntWire {
  * if the protobuf message has a field like: "optional uint32 foo = 3;", then 
  * the wire value would be "getIntWire<3>::value".
  */
-template <unsigned int tag>
+template <std::uint64_t tag>
 struct getIntWire {
-  static const unsigned int value = (tag << 3);
+  static const std::uint64_t value = (tag << 3);
 };
 
 /** \brief Loads a single signed integer (int32, int64, sint32, sint64) from an input stream.
@@ -180,7 +186,7 @@ struct getIntWire {
  * \return The signed integer (int32, int64, sint32, sint64) that was read from the input stream.
  */
 inline std::int64_t loadSInt(std::istream& p_buf) {
-  std::uint64_t u = loadVarInt(p_buf);
+  auto u = loadVarInt(p_buf);
   return (u >> 1) ^ (-static_cast<std::uint64_t>(u & 1));
 }
 
@@ -191,9 +197,9 @@ inline std::int64_t loadSInt(std::istream& p_buf) {
  * if the protobuf message has a field like: "optional int64 foo = 4;", then 
  * the wire value would be "getSIntWire<4>::value".
  */
-template <unsigned int tag>
+template <std::uint64_t tag>
 struct getSIntWire {
-  static const unsigned int value = (tag << 3);
+  static const std::uint64_t value = (tag << 3);
 };
 
 /** \brief Loads a single double (fixed64, sfixed64, double) from an input stream.
@@ -217,9 +223,9 @@ inline double loadDouble(std::istream& p_buf) {
  * if the protobuf message has a field like: "optional double foo = 3;", then 
  * the wire value would be "getFloatWire<3>::value".
  */
-template <unsigned int tag>
+template <std::uint64_t tag>
 struct getDoubleWire {
-  static const unsigned int value = (tag << 3) | 1;
+  static const std::uint64_t value = (tag << 3) | 1;
 };
 
 /** \brief Loads a single float (fixed32, sfixed32, float) from an input stream.
@@ -243,9 +249,9 @@ inline float loadFloat(std::istream& p_buf) {
  * if the protobuf message has a field like: "optional float foo = 4;", then 
  * the wire value would be "getFloatWire<4>::value".
  */
-template <unsigned int tag>
+template <std::uint64_t tag>
 struct getFloatWire {
-  static const unsigned int value = (tag << 3) | 5;
+  static const std::uint64_t value = (tag << 3) | 5;
 };
 
 /** \brief Loads a single bool (bool) from an input stream.
@@ -267,10 +273,37 @@ inline bool loadBool(std::istream& p_buf) {
  * if the protobuf message has a field like: "optional bool foo = 3;", then 
  * the wire value would be "getBoolWire<3>::value".
  */
-template <unsigned int tag>
+template <std::uint64_t tag>
 struct getBoolWire {
-  static const unsigned int value = (tag << 3);
+  static const std::uint64_t value = (tag << 3);
 };
+
+namespace {
+
+template <unsigned int Size = sizeof(std::size_t)>
+struct may_overflow {
+  static bool check(std::uint64_t u) {
+    return ( u > std::numeric_limits< std::size_t >::max() );
+  };
+  static void ignore(std::istream& p_buf, std::uint64_t u) {
+    std::size_t m = static_cast<std::size_t>(u % (1 << std::numeric_limits< std::size_t >::digits));
+    p_buf.ignore(m);
+    std::size_t n = static_cast<std::size_t>(u / std::numeric_limits< std::size_t >::max());
+    for(; n > 0; --n)
+      p_buf.ignore(std::numeric_limits< std::size_t >::max());
+  };
+};
+template <>
+struct may_overflow<sizeof(std::uint64_t)> {
+  static bool check(std::uint64_t) {
+    return false;
+  };
+  static void ignore(std::istream& p_buf, std::uint64_t u) {
+    p_buf.ignore(u);
+  };
+};
+
+} // anonymous
 
 /** \brief Loads a string (string, bytes, message, ..) from an input stream.
  * 
@@ -285,8 +318,13 @@ struct getBoolWire {
  * \return The string that was read from the input stream.
  */
 inline std::string loadString(std::istream& p_buf) {
-  unsigned int u = loadVarInt(p_buf);
-  std::string s(u,'\0');
+  std::string s;
+  auto u = loadVarInt(p_buf);
+  if( may_overflow<>::check(u) ) {
+    may_overflow<>::ignore(p_buf, u);
+    return s;
+  }
+  s.resize(static_cast<std::size_t>(u));
   p_buf.read(&s[0], u);
   return s;  //NRVO
 }
@@ -298,9 +336,9 @@ inline std::string loadString(std::istream& p_buf) {
  * if the protobuf message has a field like: "optional string name = 1;", then 
  * the wire value would be "getStringWire<1>::value".
  */
-template <unsigned int tag>
+template <std::uint64_t tag>
 struct getStringWire {
-  static const unsigned int value = (tag << 3) | 2;
+  static const std::uint64_t value = (tag << 3) | 2;
 };
 
 /** \brief Skips the next chunk of data, identified by a given wire type.
@@ -315,7 +353,7 @@ struct getStringWire {
  * \param wire The wire value seen, which describes the chunk of data ahead 
  *             on the input stream.
  */
-inline void skipData(std::istream& p_buf, unsigned int wire) {
+inline void skipData(std::istream& p_buf, std::uint64_t wire) {
   switch(wire & 0x7) {
     case 0:
       loadVarInt(p_buf);
@@ -324,8 +362,8 @@ inline void skipData(std::istream& p_buf, unsigned int wire) {
       p_buf.ignore(sizeof(double));
       break;
     case 2: {
-      unsigned int u = loadVarInt(p_buf);
-      p_buf.ignore(u);
+      auto u = loadVarInt(p_buf);
+      may_overflow<>::ignore(p_buf, u);
       break;
     };
     case 5:
@@ -501,7 +539,7 @@ inline void saveBool(std::ostream& OS, unsigned int tag, bool b) {
  * \param s The string field (string, bytes, message, ..) to write to the output stream.
  */
 inline void saveString(std::ostream& OS, const std::string& s) {
-  unsigned int u = s.size();
+  auto u = s.size();
   saveVarInt(OS, u);
   OS.write(s.data(), u);
 }

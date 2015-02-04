@@ -186,8 +186,8 @@ struct getIntWire {
  * \return The signed integer (int32, int64, sint32, sint64) that was read from the input stream.
  */
 inline std::int64_t loadSInt(std::istream& p_buf) {
-  auto u = loadVarInt(p_buf);
-  return (u >> 1) ^ (-static_cast<std::uint64_t>(u & 1));
+  std::uint64_t u = loadVarInt(p_buf);
+  return (u >> 1) ^ (-static_cast<std::int64_t>(u & 1));
 }
 
 /** \brief Meta-function to get the wire value for a signed integer with a given tag number.
@@ -286,7 +286,7 @@ struct may_overflow {
     return ( u > std::numeric_limits< std::size_t >::max() );
   };
   static void ignore(std::istream& p_buf, std::uint64_t u) {
-    std::size_t m = static_cast<std::size_t>(u % (1 << std::numeric_limits< std::size_t >::digits));
+    std::size_t m = static_cast<std::size_t>(u % (std::uint64_t(1) << std::numeric_limits< std::size_t >::digits));
     p_buf.ignore(m);
     std::size_t n = static_cast<std::size_t>(u / std::numeric_limits< std::size_t >::max());
     for(; n > 0; --n)

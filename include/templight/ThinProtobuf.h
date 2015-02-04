@@ -284,23 +284,23 @@ template <unsigned int Size = sizeof(std::size_t)>
 struct may_overflow {
   static bool check(std::uint64_t u) {
     return ( u > std::numeric_limits< std::size_t >::max() );
-  };
+  }
   static void ignore(std::istream& p_buf, std::uint64_t u) {
-    std::size_t m = static_cast<std::size_t>(u % (std::uint64_t(1) << std::numeric_limits< std::size_t >::digits));
-    p_buf.ignore(m);
     std::size_t n = static_cast<std::size_t>(u / std::numeric_limits< std::size_t >::max());
+    std::size_t m = static_cast<std::size_t>(u - std::numeric_limits< std::size_t >::max() * n);
     for(; n > 0; --n)
       p_buf.ignore(std::numeric_limits< std::size_t >::max());
-  };
+    p_buf.ignore(m);
+  }
 };
 template <>
 struct may_overflow<sizeof(std::uint64_t)> {
   static bool check(std::uint64_t) {
     return false;
-  };
+  }
   static void ignore(std::istream& p_buf, std::uint64_t u) {
     p_buf.ignore(u);
-  };
+  }
 };
 
 } // anonymous

@@ -286,11 +286,10 @@ struct may_overflow {
     return ( u > std::numeric_limits< std::size_t >::max() );
   }
   static void ignore(std::istream& p_buf, std::uint64_t u) {
-    std::size_t n = static_cast<std::size_t>(u / std::numeric_limits< std::size_t >::max());
-    std::size_t m = static_cast<std::size_t>(u - std::numeric_limits< std::size_t >::max() * n);
-    for(; n > 0; --n)
-      p_buf.ignore(std::numeric_limits< std::size_t >::max());
+    std::size_t m = static_cast<std::size_t>(u % std::numeric_limits< std::size_t >::max());
     p_buf.ignore(m);
+    for(std::uint64_t n = u / std::numeric_limits< std::size_t >::max(); n > 0; --n)
+      p_buf.ignore(std::numeric_limits< std::size_t >::max());
   }
 };
 template <>

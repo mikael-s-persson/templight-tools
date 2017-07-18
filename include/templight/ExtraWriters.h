@@ -159,7 +159,8 @@ public:
    * 
    * Creates an entry-writer for the given output stream.
    */
-  TreeWriter(std::ostream& aOS);
+  TreeWriter(
+      std::ostream& aOS, double time_threshold = 0, int memory_threshold = 0);
   ~TreeWriter();
   
   void initialize(const std::string& aSourceName = "") override;
@@ -204,6 +205,8 @@ protected:
   virtual void finalizeTree() = 0;
   
   RecordedDFSEntryTree tree;
+  double time_threshold_;
+  int memory_threshold_;
 };
 
 

@@ -57,6 +57,8 @@ int main(int argc, const char **argv) {
     ("compression,c", po::value<int>()->default_value(0), "Specify the compression level of Templight outputs whenever the format allows.")
     ("input,i", po::value< std::vector<std::string> >(), "Read Templight profiling traces from <input-file>. If not specified, the traces will be read from stdin.")
     ("inst-only", "Only keep template instantiations in the output trace.")
+    ("mem-threshold,m", po::value<int>()->default_value(0), "Filter out all the template instantitation below this memory (in bytes) threshold.")
+    ("time-threshold,t", po::value<double>()->default_value(0.0), "Filter out all the template instantitation below this time (in seconds) threshold.")
   ;
   
   po::options_description cmdline_options;
@@ -121,7 +123,10 @@ int main(int argc, const char **argv) {
     printer.takeWriter(new GraphMLCGWriter(*printer.getTraceStream()));
   }
   else if ( Format == "graphviz-cg" ) {
-    printer.takeWriter(new GraphVizCGWriter(*printer.getTraceStream()));
+    double time_threshold = vm["time-threshold"].as<double>();
+    int memory_threshold = vm["mem-threshold"].as<int>();
+    printer.takeWriter(new GraphVizCGWriter(
+          *printer.getTraceStream(), time_threshold, memory_threshold));
   }
   else if ( Format == "callgrind" ) {
     printer.takeWriter(new CallGrindWriter(*printer.getTraceStream()));

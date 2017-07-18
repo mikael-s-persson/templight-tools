@@ -89,8 +89,9 @@ static std::string escapeXml(const std::string& Input) {
 
 
 
-CallGraphWriter::CallGraphWriter(std::ostream& aOS) : 
-  TreeWriter(aOS), g() {}
+CallGraphWriter::CallGraphWriter(
+    std::ostream& aOS, double time_threshold, int memory_threshold) :
+  TreeWriter(aOS, time_threshold, memory_threshold), g() {}
 
 CallGraphWriter::~CallGraphWriter() { }
 
@@ -120,6 +121,16 @@ void CallGraphWriter::openPrintedTreeNode(const EntryTraversalTask& aNode) {
   std::uint64_t mem_diff = 0;
   if( EndEntry.MemoryUsage > BegEntry.MemoryUsage )  // avoid underflow
     mem_diff = EndEntry.MemoryUsage - BegEntry.MemoryUsage;
+
+  // Filter all the instantiations below the memory threshold
+  if (memory_threshold_ > 0 && mem_diff < memory_threshold_) {
+    return;
+  }
+
+  // Filter all the instantiations below the time threshold
+  if (time_threshold_ > 0 && (dT_ns - (time_threshold_ * 1e9)) < 0) {
+    return;
+  }
   
   if( BegEntry.InstantiationKind == MemoizationVal ) {
     // try to find an existing instantiation:
@@ -291,8 +302,9 @@ void GraphMLCGWriter::writeGraph() {
 }
 
 
-GraphVizCGWriter::GraphVizCGWriter(std::ostream& aOS) : 
-  CallGraphWriter(aOS) { }
+GraphVizCGWriter::GraphVizCGWriter(
+    std::ostream& aOS, double time_threshold, int memory_threshold) : 
+  CallGraphWriter(aOS, time_threshold, memory_threshold) { }
 
 GraphVizCGWriter::~GraphVizCGWriter() {}
 

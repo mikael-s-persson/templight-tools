@@ -249,8 +249,11 @@ void RecordedDFSEntryTree::endEntry(const PrintableEntryEnd& aEntry) {
 
 
 
-TreeWriter::TreeWriter(std::ostream& aOS) : 
-  EntryWriter(aOS), tree() { }
+TreeWriter::TreeWriter(
+    std::ostream& aOS, double time_threshold, int memory_threshold) : 
+  EntryWriter(aOS),
+  time_threshold_(time_threshold),
+  memory_threshold_(memory_threshold) { }
 
 TreeWriter::~TreeWriter() { }
 

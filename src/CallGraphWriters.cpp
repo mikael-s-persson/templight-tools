@@ -90,7 +90,7 @@ static std::string escapeXml(const std::string& Input) {
 
 
 CallGraphWriter::CallGraphWriter(
-    std::ostream& aOS, double time_threshold, int memory_threshold) :
+    std::ostream& aOS, double time_threshold, uint64_t memory_threshold) :
   TreeWriter(aOS, time_threshold, memory_threshold), g() {}
 
 CallGraphWriter::~CallGraphWriter() { }
@@ -303,7 +303,7 @@ void GraphMLCGWriter::writeGraph() {
 
 
 GraphVizCGWriter::GraphVizCGWriter(
-    std::ostream& aOS, double time_threshold, int memory_threshold) : 
+    std::ostream& aOS, double time_threshold, uint64_t memory_threshold) : 
   CallGraphWriter(aOS, time_threshold, memory_threshold) { }
 
 GraphVizCGWriter::~GraphVizCGWriter() {}

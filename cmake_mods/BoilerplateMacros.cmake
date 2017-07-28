@@ -111,7 +111,6 @@ message(STATUS "Configured compiler options for ${CMAKE_SYSTEM_NAME} system with
 
 # set(Boost_DEBUG TRUE)
 
-set(Boost_ADDITIONAL_VERSIONS "1.45" "1.45.0" "1.46" "1.46.0" "1.46.1" "1.47" "1.47.0" "1.48" "1.48.0" "1.49" "1.49.0" "1.50" "1.50.0" "1.51" "1.51.0" "1.52" "1.52.0" "1.53" "1.53.0" "1.54" "1.54.0" "1.55" "1.55.0" "1.56" "1.56.0" "1.57" "1.57.0")
 if(NOT DEFINED Boost_USE_STATIC_LIBS)
   # Some bug in some versions of FindBoost requires that this be set to OFF manually first.
   set(Boost_USE_STATIC_LIBS OFF)
@@ -119,9 +118,9 @@ endif()
 set(Boost_USE_MULTITHREADED ON)
 
 # if a custom path for boost is provided, than use that (and suppress system paths).
-if(EXISTS "${CUSTOM_BOOST_PATH}/include/boost")
-  set(Boost_INCLUDE_DIR "${CUSTOM_BOOST_PATH}/include")
-  set(Boost_LIBRARY_DIR "${CUSTOM_BOOST_PATH}/lib")
+if(EXISTS "${CUSTOM_BOOST_PATH}/boost")
+  set(Boost_INCLUDE_DIR "${CUSTOM_BOOST_PATH}/boost")
+  set(Boost_LIBRARY_DIR "${CUSTOM_BOOST_PATH}/stage/lib")
   set(Boost_NO_SYSTEM_PATHS TRUE)
 endif()
 
@@ -137,7 +136,7 @@ if (NOT WIN32)
   set(CMAKE_FIND_LIBRARY_PREFIXES lib ${CMAKE_FIND_LIBRARY_PREFIXES})
 endif()
 
-find_package(Boost 1.48 COMPONENTS system program_options unit_test_framework filesystem REQUIRED)
+find_package(Boost COMPONENTS system program_options unit_test_framework filesystem REQUIRED)
 if(Boost_FOUND)
   include_directories(SYSTEM ${Boost_INCLUDE_DIR})
   link_directories(${Boost_LIBRARY_DIRS})

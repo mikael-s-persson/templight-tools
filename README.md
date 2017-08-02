@@ -189,7 +189,7 @@ And for the meta-call-graph:
 
 [![](images/fibonacci_small.o.trace.cg.gv.png)](images/fibonacci.o.trace.cg.gv.png)
 
-This is admitedly rather crude at the moment.
+This is admittedly rather crude at the moment.
 
 ### Inspecting with KCacheGrind
 

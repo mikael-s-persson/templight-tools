@@ -315,15 +315,12 @@ namespace {
     GraphVizCGLabelWriter(CallGraphWriter::graph_t* pG) : p_g(pG) { };
     
     void operator()(std::ostream& out, CallGraphWriter::vertex_t v) const {
-      std::string EscapedName = escapeXml((*p_g)[v].Name);
+      std::string EscapedName = (*p_g)[v].Name;
       out 
-        << "[label = \"" << InstantiationKindStrings[(*p_g)[v].InstantiationKind] 
-        << "\\n" << EscapedName << "\\n"
-        << "At " << (*p_g)[v].CalleeFileName 
-        << ":" << (*p_g)[v].CalleeLine 
-        << ":" << (*p_g)[v].CalleeColumn << "\\n"
-        << "Time: " << std::fixed << std::setprecision(9) << (1e-9 * double((*p_g)[v].TimeExclCost)) 
-        << " seconds; Memory: " << (*p_g)[v].MemoryExclCost << " bytes\"]";
+        << EscapedName << " Time: "
+				<< std::fixed << std::setprecision(9)
+				<< (1e-9 * double((*p_g)[v].TimeExclCost)) 
+        << " seconds";
     }
   };
   

@@ -316,11 +316,9 @@ namespace {
     
     void operator()(std::ostream& out, CallGraphWriter::vertex_t v) const {
       std::string EscapedName = (*p_g)[v].Name;
-      out 
-        << EscapedName << " Time: "
-				<< std::fixed << std::setprecision(9)
+      out << "Time: " << std::fixed << std::setprecision(9)
 				<< (1e-9 * double((*p_g)[v].TimeExclCost)) 
-        << " seconds";
+        << " seconds | " << EscapedName;
     }
   };
   

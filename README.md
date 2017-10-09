@@ -89,6 +89,8 @@ The `templight-convert` utility supports the following options:
  - `--format` or `-f` - Specify the format of Templight outputs (protobuf / xml / text / graphml / graphviz / nestedxml / graphml-cg / graphviz-cg / callgrind, default is protobuf).
  - `--blacklist` or `-b` - Use regex expressions in <file> to filter out undesirable traces.
  - `--compression` or `-c` - Specify the compression level of Templight outputs whenever the format allows.
+ - `--time-threshold` or `-t` - Filter out all the template instantitation below this time (in seconds) threshold.
+ - `--mem-threshold` or `-m` - Filter out all the template instantitation below this memory (in bytes) threshold.
  - `--blacklist=<file>` - Specify a blacklist file that lists declaration contexts (e.g., namespaces) and identifiers (e.g., `std::basic_string`) as regular expressions to be filtered out of the trace (not appear in the profiler trace files). Every line of the blacklist file should contain either "context" or "identifier", followed by a single space character and then, a valid regular expression.
 
 ### Template Instantiation Tree vs. Meta-Call-Graph

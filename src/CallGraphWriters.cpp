@@ -89,8 +89,9 @@ static std::string escapeXml(const std::string& Input) {
 
 
 
-CallGraphWriter::CallGraphWriter(std::ostream& aOS) : 
-  TreeWriter(aOS), g() {}
+CallGraphWriter::CallGraphWriter(
+    std::ostream& aOS, double time_threshold, uint64_t memory_threshold) :
+  TreeWriter(aOS, time_threshold, memory_threshold), g() {}
 
 CallGraphWriter::~CallGraphWriter() { }
 
@@ -120,6 +121,16 @@ void CallGraphWriter::openPrintedTreeNode(const EntryTraversalTask& aNode) {
   std::uint64_t mem_diff = 0;
   if( EndEntry.MemoryUsage > BegEntry.MemoryUsage )  // avoid underflow
     mem_diff = EndEntry.MemoryUsage - BegEntry.MemoryUsage;
+
+  // Filter all the instantiations below the memory threshold
+  if (memory_threshold_ > 0 && mem_diff < memory_threshold_) {
+    return;
+  }
+
+  // Filter all the instantiations below the time threshold
+  if (time_threshold_ > 0 && (dT_ns - (time_threshold_ * 1e9)) < 0) {
+    return;
+  }
   
   if( BegEntry.InstantiationKind == MemoizationVal ) {
     // try to find an existing instantiation:
@@ -291,8 +302,9 @@ void GraphMLCGWriter::writeGraph() {
 }
 
 
-GraphVizCGWriter::GraphVizCGWriter(std::ostream& aOS) : 
-  CallGraphWriter(aOS) { }
+GraphVizCGWriter::GraphVizCGWriter(
+    std::ostream& aOS, double time_threshold, uint64_t memory_threshold) : 
+  CallGraphWriter(aOS, time_threshold, memory_threshold) { }
 
 GraphVizCGWriter::~GraphVizCGWriter() {}
 
@@ -303,15 +315,10 @@ namespace {
     GraphVizCGLabelWriter(CallGraphWriter::graph_t* pG) : p_g(pG) { };
     
     void operator()(std::ostream& out, CallGraphWriter::vertex_t v) const {
-      std::string EscapedName = escapeXml((*p_g)[v].Name);
-      out 
-        << "[label = \"" << InstantiationKindStrings[(*p_g)[v].InstantiationKind] 
-        << "\\n" << EscapedName << "\\n"
-        << "At " << (*p_g)[v].CalleeFileName 
-        << ":" << (*p_g)[v].CalleeLine 
-        << ":" << (*p_g)[v].CalleeColumn << "\\n"
-        << "Time: " << std::fixed << std::setprecision(9) << (1e-9 * double((*p_g)[v].TimeExclCost)) 
-        << " seconds; Memory: " << (*p_g)[v].MemoryExclCost << " bytes\"]";
+      std::string EscapedName = (*p_g)[v].Name;
+      out << "Time: " << std::fixed << std::setprecision(9)
+				<< (1e-9 * double((*p_g)[v].TimeExclCost)) 
+        << " seconds | " << EscapedName;
     }
   };
   

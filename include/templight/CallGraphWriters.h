@@ -90,7 +90,8 @@ public:
    * 
    * Creates an entry-writer for the given output stream.
    */
-  CallGraphWriter(std::ostream& aOS);
+  CallGraphWriter(
+    std::ostream& aOS, double time_threshold = 0, uint64_t memory_threshold = 0);
   ~CallGraphWriter();
   
   typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, MetaCGVertex, MetaCGEdge> graph_t;
@@ -154,7 +155,7 @@ public:
    * 
    * Creates an entry-writer for the given output stream.
    */
-  GraphVizCGWriter(std::ostream& aOS);
+  GraphVizCGWriter(std::ostream& aOS, double time_threshold, uint64_t memory_threshold);
   ~GraphVizCGWriter();
   
 protected:

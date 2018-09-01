@@ -36,20 +36,23 @@
 
 namespace templight {
 
-
+// Must match CodeSynthesisContext::SynthesisKind in Sema.h from Clang
 static const char* const InstantiationKindStrings[] = { 
-  "TemplateInstantiation",
-  "DefaultTemplateArgumentInstantiation",
-  "DefaultFunctionArgumentInstantiation",
-  "ExplicitTemplateArgumentSubstitution",
-  "DeducedTemplateArgumentSubstitution", 
-  "PriorTemplateArgumentSubstitution",
-  "DefaultTemplateArgumentChecking", 
-  "ExceptionSpecInstantiation",
-  "Memoization" };
+	"TemplateInstantiation",
+	"DefaultTemplateArgumentInstantiation",
+	"DefaultFunctionArgumentInstantiation",
+	"ExplicitTemplateArgumentSubstitution",
+	"DeducedTemplateArgumentSubstitution",
+	"PriorTemplateArgumentSubstitution",
+	"DefaultTemplateArgumentChecking",
+	"ExceptionSpecInstantiation",
+	"DeclaringSpecialMember",
+	"DefiningSynthesizedFunction",
+	"Memoization",
+};
 
-static const int TemplateInstantiationVal = 0;
-static const int MemoizationVal = 8;
+const int TemplateInstantiationVal = 0;
+const int MemoizationVal = 10;
 
 
 static std::string escapeXml(const std::string& Input) {

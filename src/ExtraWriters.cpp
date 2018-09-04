@@ -21,6 +21,7 @@
  */
 
 #include <templight/ExtraWriters.h>
+#include <templight/CallGraphWriters.h>
 
 #include <iostream>
 #include <fstream>
@@ -28,19 +29,6 @@
 #include <vector>
 
 namespace templight {
-
-
-static const char* const InstantiationKindStrings[] = { 
-  "TemplateInstantiation",
-  "DefaultTemplateArgumentInstantiation",
-  "DefaultFunctionArgumentInstantiation",
-  "ExplicitTemplateArgumentSubstitution",
-  "DeducedTemplateArgumentSubstitution", 
-  "PriorTemplateArgumentSubstitution",
-  "DefaultTemplateArgumentChecking", 
-  "ExceptionSpecInstantiation",
-  "Memoization" };
-
 
 static std::string escapeXml(const std::string& Input) {
   std::string Result;

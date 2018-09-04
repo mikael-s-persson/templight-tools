@@ -46,6 +46,9 @@
 
 namespace templight {
 
+extern const char* const InstantiationKindStrings[];
+extern const int TemplateInstantiationVal;
+extern const int MemoizationVal;
 
 /** \brief Represents a node of the meta-call-graph.
  * 

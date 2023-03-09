@@ -3,6 +3,7 @@ add_library(templight STATIC
   "CallGraphWriters.cpp"
   "EntryPrinter.cpp"
   "ExtraWriters.cpp"
+  "PrintableEntries.cpp"
   "ProtobufReader.cpp"
   "ProtobufWriter.cpp"
 )

@@ -36,22 +36,6 @@
 
 namespace templight {
 
-
-static const char* const InstantiationKindStrings[] = { 
-  "TemplateInstantiation",
-  "DefaultTemplateArgumentInstantiation",
-  "DefaultFunctionArgumentInstantiation",
-  "ExplicitTemplateArgumentSubstitution",
-  "DeducedTemplateArgumentSubstitution", 
-  "PriorTemplateArgumentSubstitution",
-  "DefaultTemplateArgumentChecking", 
-  "ExceptionSpecInstantiation",
-  "Memoization" };
-
-static const int TemplateInstantiationVal = 0;
-static const int MemoizationVal = 8;
-
-
 static std::string escapeXml(const std::string& Input) {
   std::string Result;
   Result.reserve(64);
@@ -212,7 +196,7 @@ namespace {
       
       std::string EscapedName = escapeXml(g[u].Name);
       (*p_out) << 
-        "  <data key=\"d0\">" << InstantiationKindStrings[g[u].InstantiationKind] << "</data>\n"
+        "  <data key=\"d0\">" << GetInstantiationKindString(g[u].InstantiationKind) << "</data>\n"
         "  <data key=\"d1\">\"" << EscapedName <<"\"</data>\n"
         "  <data key=\"d2\">\"" << g[u].CalleeFileName << "|" 
                                 << g[u].CalleeLine << "|" 
@@ -305,7 +289,7 @@ namespace {
     void operator()(std::ostream& out, CallGraphWriter::vertex_t v) const {
       std::string EscapedName = escapeXml((*p_g)[v].Name);
       out 
-        << "[label = \"" << InstantiationKindStrings[(*p_g)[v].InstantiationKind] 
+        << "[label = \"" << GetInstantiationKindString((*p_g)[v].InstantiationKind) 
         << "\\n" << EscapedName << "\\n"
         << "At " << (*p_g)[v].CalleeFileName 
         << ":" << (*p_g)[v].CalleeLine 

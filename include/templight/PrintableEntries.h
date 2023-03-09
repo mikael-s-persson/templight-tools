@@ -61,6 +61,11 @@ struct PrintableEntryBegin {
   int TempOri_Column;           ///< The column where the template is defined.
 };
 
+const char* GetInstantiationKindString(int inst_kind);
+
+static constexpr int TemplateInstantiationVal = 0;
+static constexpr int MemoizationVal = 11;
+
 /** \brief Represents the end of a templight trace entry.
  * 
  * This struct represents the end of a templight trace entry, 

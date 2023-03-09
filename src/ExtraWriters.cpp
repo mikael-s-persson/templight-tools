@@ -29,19 +29,6 @@
 
 namespace templight {
 
-
-static const char* const InstantiationKindStrings[] = { 
-  "TemplateInstantiation",
-  "DefaultTemplateArgumentInstantiation",
-  "DefaultFunctionArgumentInstantiation",
-  "ExplicitTemplateArgumentSubstitution",
-  "DeducedTemplateArgumentSubstitution", 
-  "PriorTemplateArgumentSubstitution",
-  "DefaultTemplateArgumentChecking", 
-  "ExceptionSpecInstantiation",
-  "Memoization" };
-
-
 static std::string escapeXml(const std::string& Input) {
   std::string Result;
   Result.reserve(64);
@@ -107,7 +94,7 @@ void YamlWriter::printEntry(const PrintableEntryBegin& aEntry) {
   
   OutputOS << 
     "- IsBegin:         true\n"
-    "  Kind:            " << InstantiationKindStrings[aEntry.InstantiationKind] << "\n"
+    "  Kind:            " << GetInstantiationKindString(aEntry.InstantiationKind) << "\n"
     "  Name:            '" << escapeSingleQuotedScalar(aEntry.Name) << "'\n" 
     "  Location:        '" << aEntry.FileName << "|" 
                            << aEntry.Line << "|" 
@@ -165,7 +152,7 @@ void XmlWriter::printEntry(const PrintableEntryBegin& aEntry) {
   std::string EscapedName = escapeXml(aEntry.Name);
   OutputOS << 
     "<TemplateBegin>\n"
-    "    <Kind>" << InstantiationKindStrings[aEntry.InstantiationKind] << "</Kind>\n"
+    "    <Kind>" << GetInstantiationKindString(aEntry.InstantiationKind) << "</Kind>\n"
     "    <Context context = \"" << EscapedName << "\"/>\n"
     "    <Location>" << aEntry.FileName << "|" 
                      << aEntry.Line << "|" 
@@ -205,7 +192,7 @@ void TextWriter::finalize() {}
 void TextWriter::printEntry(const PrintableEntryBegin& aEntry) {
   OutputOS << 
     "TemplateBegin\n"
-    "  Kind = " << InstantiationKindStrings[aEntry.InstantiationKind] << "\n"
+    "  Kind = " << GetInstantiationKindString(aEntry.InstantiationKind) << "\n"
     "  Name = " << aEntry.Name << "\n"
     "  Location = " << aEntry.FileName << "|" 
                     << aEntry.Line << "|" 
@@ -310,7 +297,7 @@ void NestedXMLWriter::openPrintedTreeNode(const EntryTraversalTask& aNode) {
   std::string EscapedName = escapeXml(BegEntry.Name);
   
   OutputOS << 
-    "<Entry Kind=\"" << InstantiationKindStrings[BegEntry.InstantiationKind] 
+    "<Entry Kind=\"" << GetInstantiationKindString(BegEntry.InstantiationKind) 
     << "\" Name=\"" << EscapedName << "\" ";
   OutputOS << 
     "Location=\"" << BegEntry.FileName << "|" 
@@ -377,7 +364,7 @@ void GraphMLWriter::openPrintedTreeNode(const EntryTraversalTask& aNode) {
   
   std::string EscapedName = escapeXml(BegEntry.Name);
   OutputOS << 
-    "  <data key=\"d0\">" << InstantiationKindStrings[BegEntry.InstantiationKind] << "</data>\n"
+    "  <data key=\"d0\">" << GetInstantiationKindString(BegEntry.InstantiationKind) << "</data>\n"
     "  <data key=\"d1\">\"" << EscapedName <<"\"</data>\n"
     "  <data key=\"d2\">\"" << BegEntry.FileName << "|" 
                             << BegEntry.Line << "|" 
@@ -427,7 +414,7 @@ void GraphVizWriter::openPrintedTreeNode(const EntryTraversalTask& aNode) {
   std::string EscapedName = escapeXml(BegEntry.Name);
   OutputOS 
     << "n" << aNode.nd_id << " [label = "
-    << "\"" << InstantiationKindStrings[BegEntry.InstantiationKind] << "\\n"
+    << "\"" << GetInstantiationKindString(BegEntry.InstantiationKind) << "\\n"
     << EscapedName << "\\n"
     << "At " << BegEntry.FileName << " Line " << BegEntry.Line << " Column " << BegEntry.Column << "\\n";
   if( !BegEntry.TempOri_FileName.empty() ) {

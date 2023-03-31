@@ -64,7 +64,7 @@ struct PrintableEntryBegin {
 const char* GetInstantiationKindString(int inst_kind);
 
 static constexpr int TemplateInstantiationVal = 0;
-static constexpr int MemoizationVal = 11;
+static constexpr int MemoizationVal = 23;
 
 /** \brief Represents the end of a templight trace entry.
  * 

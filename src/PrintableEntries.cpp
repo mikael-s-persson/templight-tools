@@ -45,14 +45,39 @@ const char* GetInstantiationKindString(int inst_kind) {
     case 8:
       return "ExceptionSpecInstantiation";
     case 9:
-      return "DeclaringSpecialMember";
+      return "RequirementInstantiation";
     case 10:
-      return "DefiningSynthesizedFunction";
+      return "NestedRequirementConstraintsCheck";
     case 11:
-    default:
+      return "DeclaringSpecialMember";
+    case 12:
+      return "DeclaringImplicitEqualityComparison";
+    case 13:
+      return "DefiningSynthesizedFunction";
+    case 14:
+      return "ConstraintsCheck";
+    case 15:
+      return "ConstraintSubstitution";
+    case 16:
+      return "ConstraintNormalization";
+    case 17:
+      return "RequirementParameterInstantiation";
+    case 18:
+      return "ParameterMappingSubstitution";
+    case 19:
+      return "RewritingOperatorAsSpaceship";
+    case 20:
+      return "InitializingStructuredBinding";
+    case 21:
+      return "MarkingClassDllexported";
+    case 22:
+      return "BuildingBuiltinDumpStructCall";
+    case 23:
       return "Memoization";
+    default:
+      return "UnknownInstantiationKind";
   }
-  return "Memoization";
+  return "UnknownInstantiationKind";
 }
 
 }

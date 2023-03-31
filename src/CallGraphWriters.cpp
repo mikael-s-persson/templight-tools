@@ -104,22 +104,40 @@ void CallGraphWriter::openPrintedTreeNode(const EntryTraversalTask& aNode) {
   std::uint64_t mem_diff = 0;
   if( EndEntry.MemoryUsage > BegEntry.MemoryUsage )  // avoid underflow
     mem_diff = EndEntry.MemoryUsage - BegEntry.MemoryUsage;
-  
+
+  // Create or find vertex.
+  bool new_vertex = false;
   if( BegEntry.InstantiationKind == MemoizationVal ) {
     // try to find an existing instantiation:
     auto it = inst_map.find(BegEntry.Name);
     if( it != inst_map.end() ) {
       v = it->second;
-    } else {
-      // if we have a memoization that is unmatched, then
-      //  it's not a template, or just 'noise', or whatever.
-      return;
     }
-  } else {
-    v = add_vertex(g);
-    if( BegEntry.InstantiationKind == TemplateInstantiationVal )
+  } else if( BegEntry.InstantiationKind == TemplateInstantiationVal ) {
+    // Reuse or create a new full instantiation node.
+    auto it = inst_map.find(BegEntry.Name);
+    if( it != inst_map.end() ) {
+      v = it->second;
+    } else {
+      new_vertex = true;
+      v = add_vertex(g);
       inst_map[BegEntry.Name] = v;
+    }
     tree_to_graph[aNode.nd_id] = v;
+  } else {
+    new_vertex = true;
+    v = add_vertex(g);
+    tree_to_graph[aNode.nd_id] = v;
+  }
+
+  if( v == boost::graph_traits<graph_t>::null_vertex() ) {
+    // if we have a memoization that is unmatched, then
+    //  it's not a template, or just 'noise', or whatever.
+    return;
+  }
+
+  // Fill in profiling data, only for a new vertex or if entry is the "real" entry.
+  if( new_vertex || dT_ns > g[v].TimeExclCost ) {
     g[v].InstantiationKind = BegEntry.InstantiationKind;
     g[v].Name = BegEntry.Name;
     g[v].CalleeFileName = BegEntry.TempOri_FileName; // Template origin is the "callee"
